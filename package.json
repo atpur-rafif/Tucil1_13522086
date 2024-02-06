@@ -1,0 +1,13 @@
+{
+	"name": "if2211-tucil-1",
+	"version": "1.0.0",
+	"description": "",
+	"main": "bin/index.js",
+	"scripts": {
+		"dev": "tsc --watch & nodemon -q --exec \"clear && node .\"",
+		"build": "tsc"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC"
+}
