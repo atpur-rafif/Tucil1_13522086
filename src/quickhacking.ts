@@ -32,7 +32,8 @@ const countReward = (sequence: Sequence, rewardList: RewardList) => {
 	return total
 }
 
-const boardSize = 6
+const boardWidth = 6
+const boardHeight = 3
 const buffer = 7
 const matrix = [
 	['7A', '55', 'E9', 'E9', '1C', '55'],
@@ -50,14 +51,14 @@ const rewardList: RewardList = [
 
 // console.log(countReward(['7A', 'BD', '7A', 'BD', '1C', 'BD', '55'], rewardList))
 
-const flattenCoordinate = (row: number, col: number) => row * boardSize + col
+const flattenCoordinate = (row: number, col: number) => row * boardWidth + col
 
 const startTime = performance.now()
 
 const state: HackingState = {
 	matrix,
 	sequence: [],
-	taken: new Array(boardSize * boardSize).fill(false),
+	taken: new Array(boardWidth * boardWidth).fill(false),
 	isHorizontal: true,
 	rcPos: 0,
 	step: []
@@ -85,11 +86,12 @@ const process = () => {
 	state.isHorizontal = !state.isHorizontal
 
 	// Iteration
-	for (let newRcPos = 0; newRcPos < boardSize; ++newRcPos) {
+	const maxRcPos = oldIsHorizontal ? boardWidth : boardHeight
+	for (let newRcPos = 0; newRcPos < maxRcPos; ++newRcPos) {
 		const row = oldIsHorizontal ? oldRcPos : newRcPos
 		const col = oldIsHorizontal ? newRcPos : oldRcPos
 
-		const flatten = row * boardSize + col
+		const flatten = row * boardWidth + col
 		if (state.taken[flatten] == true) continue
 
 		const token = state.matrix[row][col]

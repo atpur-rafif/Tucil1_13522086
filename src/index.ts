@@ -1,1 +1,1 @@
-import "./generator"
+import "./quickhacking"
