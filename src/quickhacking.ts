@@ -8,7 +8,8 @@ type HackingState = {
 	sequence: Sequence,
 	taken: boolean[],
 	isHorizontal: boolean,
-	rcPos: number
+	rcPos: number,
+	step: [number, number][]
 }
 
 export function hack() {
@@ -59,11 +60,13 @@ const state: HackingState = {
 	taken: new Array(boardSize * boardSize).fill(false),
 	isHorizontal: true,
 	rcPos: 0,
+	step: []
 }
 
 const optimal = {
 	reward: 0,
-	sequence: null as Sequence
+	sequence: null as Sequence,
+	step: [] as [number, number][]
 }
 
 const process = () => {
@@ -72,6 +75,7 @@ const process = () => {
 		if (reward > optimal.reward) {
 			optimal.reward = reward
 			optimal.sequence = [...state.sequence]
+			optimal.step = [...state.step]
 		}
 		return
 	}
@@ -91,12 +95,14 @@ const process = () => {
 		const token = state.matrix[row][col]
 		state.rcPos = newRcPos
 		state.sequence.push(token)
+		state.step.push([row, col])
 		state.taken[flatten] = true
 
 		process()
 
 		state.taken[flatten] = false
 		state.sequence.pop()
+		state.step.pop()
 	}
 
 	state.isHorizontal = oldIsHorizontal
