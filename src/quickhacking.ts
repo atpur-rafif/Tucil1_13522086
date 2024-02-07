@@ -47,56 +47,62 @@ const rewardList: RewardList = [
 	[['BD', '1C', 'BD', '55'], 30]
 ]
 
+// console.log(countReward(['7A', 'BD', '7A', 'BD', '1C', 'BD', '55'], rewardList))
+
 const flattenCoordinate = (row: number, col: number) => row * boardSize + col
-const startState: HackingState = {
+
+const startTime = performance.now()
+
+const state: HackingState = {
 	matrix,
 	sequence: [],
 	taken: new Array(boardSize * boardSize).fill(false),
 	isHorizontal: true,
-	rcPos: 0
+	rcPos: 0,
 }
 
-const queues: HackingState[] = [startState]
-let max = 0
-let seq = null
+const optimal = {
+	reward: 0,
+	sequence: null as Sequence
+}
 
-const startTime = performance.now()
-while (queues.length > 0) {
-	const {
-		isHorizontal,
-		matrix,
-		sequence,
-		rcPos,
-		taken
-	} = queues.shift()
-	if (sequence.length == buffer) {
-		const reward = countReward(sequence, rewardList)
-		if (reward > max) {
-			max = reward
-			seq = sequence
+const process = () => {
+	if (state.sequence.length == buffer) {
+		const reward = countReward(state.sequence, rewardList)
+		if (reward > optimal.reward) {
+			optimal.reward = reward
+			optimal.sequence = [...state.sequence]
 		}
-		continue
+		return
 	}
 
+	const oldIsHorizontal = state.isHorizontal
+	const oldRcPos = state.rcPos
+	state.isHorizontal = !state.isHorizontal
+
+	// Iteration
 	for (let newRcPos = 0; newRcPos < boardSize; ++newRcPos) {
-		const row = isHorizontal ? rcPos : newRcPos
-		const col = isHorizontal ? newRcPos : rcPos
+		const row = oldIsHorizontal ? oldRcPos : newRcPos
+		const col = oldIsHorizontal ? newRcPos : oldRcPos
 
-		if (taken[flattenCoordinate(row, col)] == true) continue
+		const flatten = row * boardSize + col
+		if (state.taken[flatten] == true) continue
 
-		const newSequence = [...sequence, matrix[row][col]]
-		const newTaken = [...taken]
-		newTaken[flattenCoordinate(row, col)] = true
+		const token = state.matrix[row][col]
+		state.rcPos = newRcPos
+		state.sequence.push(token)
+		state.taken[flatten] = true
 
-		queues.push({
-			matrix,
-			sequence: newSequence,
-			taken: newTaken,
-			isHorizontal: !isHorizontal,
-			rcPos: newRcPos
-		})
+		process()
+
+		state.taken[flatten] = false
+		state.sequence.pop()
 	}
+
+	state.isHorizontal = oldIsHorizontal
+	state.rcPos = oldRcPos
 }
+process()
 const endTime = performance.now()
 
-console.log(max, seq, endTime - startTime)
+console.log(optimal, endTime - startTime)
