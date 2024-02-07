@@ -1,2 +1,1 @@
-import { hack } from "./quickhacking"
-hack()
+import "./generator"
