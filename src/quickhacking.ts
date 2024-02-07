@@ -12,10 +12,6 @@ type HackingState = {
 	step: [number, number][]
 }
 
-export function hack() {
-	console.log("Hacking...")
-}
-
 const countReward = (sequence: Sequence, rewardList: RewardList) => {
 	let total = 0
 	for (const [targetSequence, reward] of rewardList) {
@@ -33,7 +29,7 @@ const countReward = (sequence: Sequence, rewardList: RewardList) => {
 }
 
 const boardWidth = 6
-const boardHeight = 3
+const boardHeight = 6
 const buffer = 7
 const matrix = [
 	['7A', '55', 'E9', 'E9', '1C', '55'],
@@ -48,10 +44,6 @@ const rewardList: RewardList = [
 	[['BD', '7A', 'BD'], 20],
 	[['BD', '1C', 'BD', '55'], 30]
 ]
-
-// console.log(countReward(['7A', 'BD', '7A', 'BD', '1C', 'BD', '55'], rewardList))
-
-const flattenCoordinate = (row: number, col: number) => row * boardWidth + col
 
 const startTime = performance.now()
 
@@ -70,7 +62,7 @@ const optimal = {
 	step: [] as [number, number][]
 }
 
-const process = () => {
+const runner = () => {
 	if (state.sequence.length == buffer) {
 		const reward = countReward(state.sequence, rewardList)
 		if (reward > optimal.reward) {
@@ -100,7 +92,7 @@ const process = () => {
 		state.step.push([row, col])
 		state.taken[flatten] = true
 
-		process()
+		runner()
 
 		state.taken[flatten] = false
 		state.sequence.pop()
@@ -110,7 +102,7 @@ const process = () => {
 	state.isHorizontal = oldIsHorizontal
 	state.rcPos = oldRcPos
 }
-process()
+runner()
 const endTime = performance.now()
 
 console.log(optimal, endTime - startTime)
