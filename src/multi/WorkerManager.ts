@@ -2,7 +2,7 @@ import { Worker } from "worker_threads"
 import { FinishedMessage, StartMessage } from "./types"
 import { resolve } from "path"
 
-class WorkerManager {
+export class WorkerManager {
 	private size: number
 	private resolver: (() => void)[]
 	private worker: Worker[]
@@ -38,7 +38,7 @@ class WorkerManager {
 		if (this.freeWorker.length <= 0) throw Error("All worker busy, program should wait with `waitForUnemplyed` method");
 
 		let resolver: any
-		const promise = new Promise(r => resolver = r)
+		const promise = new Promise<FinishedMessage>(r => resolver = r)
 
 		const worker = this.freeWorker.shift()
 		worker.postMessage(data)
@@ -52,31 +52,10 @@ class WorkerManager {
 		return promise
 	}
 
-	killAll() {
+	askToKill() {
 		this.worker.forEach(worker => {
-			worker.terminate()
+			worker.addListener("message", () => worker.terminate())
 		})
+		this.freeWorker.forEach(worker => worker.terminate())
 	}
 }
-const count = 500
-let counter = 0
-const workerManager = new WorkerManager(12);
-
-const start = performance.now();
-(async function() {
-	for (let i = 0; i < count; ++i) {
-		await workerManager.waitForUnemployed()
-		workerManager.run({
-			data: 40
-		}).then((data) => {
-			console.log(i, data)
-
-			const end = performance.now()
-			counter++
-			if (counter == count) {
-				console.log(counter, end - start)
-				workerManager.killAll()
-			}
-		})
-	}
-})();

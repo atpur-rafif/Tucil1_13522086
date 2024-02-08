@@ -1,1 +1,1 @@
-import "./multi/supervisor"
+import "./multi/quickhacking"
