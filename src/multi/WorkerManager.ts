@@ -41,7 +41,7 @@ export class WorkerManager {
 		const promise = new Promise<FinishedMessage>(r => resolver = r)
 
 		const worker = this.freeWorker.shift()
-		worker.postMessage(data)
+		worker.postMessage(JSON.stringify(data))
 
 		const returner = (data: FinishedMessage) => {
 			worker.removeListener("message", returner)

@@ -1,5 +1,5 @@
 import { parentPort } from "worker_threads"
-import { FinishedMessage, StartMessage } from "./types";
+import { FinishedMessage } from "./types";
 
 const countReward = (sequence: Sequence, rewardList: RewardList) => {
 	let total = 0
@@ -17,8 +17,8 @@ const countReward = (sequence: Sequence, rewardList: RewardList) => {
 	return total
 }
 
-parentPort.addListener("message", (msg: StartMessage) => {
-	const state = msg
+parentPort.addListener("message", (msg) => {
+	const state = JSON.parse(msg)
 
 	const optimal: FinishedMessage = {
 		reward: 0,

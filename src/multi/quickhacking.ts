@@ -17,7 +17,7 @@ const createState = (board: HackingBoard): HackingState => {
 
 const state = createState(exampleBoard)
 
-const divergePoint = 2
+const divergePoint = 5
 
 const runnerDivergePoint = divergePoint < state.board.buffer ? divergePoint : 0
 const promisedResult: Promise<FinishedMessage>[] = []

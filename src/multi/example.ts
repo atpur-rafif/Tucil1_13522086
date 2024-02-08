@@ -3,7 +3,7 @@ import { HackingBoard } from "./types";
 export const exampleBoard: HackingBoard = {
 	width: 6,
 	height: 6,
-	buffer: 12,
+	buffer: 13,
 	matrix: [
 		['7A', '55', 'E9', 'E9', '1C', '55'],
 		['55', '7A', '1C', '7A', 'E9', '55'],
