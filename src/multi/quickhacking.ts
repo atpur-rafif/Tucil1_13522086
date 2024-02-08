@@ -64,11 +64,14 @@ runner().then(() => {
 	workerManager.askToKill()
 	Promise.all(promisedResult).then((optimalStepsCandidate) => {
 		let optimalStep = optimalStepsCandidate[0]
+		let workerTime = 0
 		optimalStepsCandidate.forEach(candidate => {
 			if (candidate.reward > optimalStep.reward) {
 				optimalStep = candidate
 			}
+			workerTime += candidate.time
 		})
+		optimalStep.time = workerTime
 
 		const end = performance.now()
 		console.log(end - start, optimalStep)

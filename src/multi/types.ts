@@ -25,7 +25,8 @@ export type HackingState = {
 export type OptimalStep = {
 	sequence: Sequence,
 	reward: Reward,
-	steps: Step[]
+	steps: Step[],
+	time: number
 }
 
 export type StartMessage = HackingState

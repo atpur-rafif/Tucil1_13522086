@@ -23,7 +23,8 @@ parentPort.addListener("message", (msg) => {
 	const optimal: FinishedMessage = {
 		reward: 0,
 		sequence: null as any,
-		steps: null as any
+		steps: null as any,
+		time: 0
 	}
 
 	const runner = () => {
@@ -66,7 +67,11 @@ parentPort.addListener("message", (msg) => {
 		state.isHorizontal = oldIsHorizontal
 		state.rcPos = oldRcPos
 	}
+
+	const start = performance.now()
 	runner()
+	const end = performance.now()
+	optimal.time = end - start
 
 	parentPort.postMessage(optimal)
 })
