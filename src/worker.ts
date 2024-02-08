@@ -1,5 +1,5 @@
 import { parentPort } from "worker_threads"
-import { FinishedMessage } from "./types";
+import { FinishedMessage, Sequence, RewardList } from "./types";
 
 const countReward = (sequence: Sequence, rewardList: RewardList) => {
 	let total = 0

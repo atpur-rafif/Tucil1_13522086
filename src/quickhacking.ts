@@ -1,75 +1,31 @@
-type Token = string;
-type Matrix = Token[][];
-type Sequence = Token[];
-type Reward = number;
-type RewardList = [Token[], Reward][]
-type HackingState = {
-	matrix: Matrix,
-	sequence: Sequence,
-	taken: boolean[],
-	isHorizontal: boolean,
-	rcPos: number,
-	step: [number, number][]
-}
+import { WorkerManager } from "./WorkerManager";
+import { exampleBoard } from "./example";
+import { FinishedMessage, HackingBoard, HackingState } from "./types";
 
-const countReward = (sequence: Sequence, rewardList: RewardList) => {
-	let total = 0
-	for (const [targetSequence, reward] of rewardList) {
-		let matchCount = 0
-		for (const token of sequence) {
-			if (token != targetSequence[matchCount]) matchCount = 0
-			if (token == targetSequence[matchCount]) matchCount++
-			if (matchCount == targetSequence.length) {
-				total += reward
-				break
-			}
-		}
+const workerManager = new WorkerManager(12);
+
+const createState = (board: HackingBoard): HackingState => {
+	return {
+		board,
+		rcPos: 0,
+		isHorizontal: true,
+		steps: [],
+		sequence: [],
+		taken: new Array(board.width * board.height),
 	}
-	return total
 }
 
-const boardWidth = 6
-const boardHeight = 6
-const buffer = 7
-const matrix = [
-	['7A', '55', 'E9', 'E9', '1C', '55'],
-	['55', '7A', '1C', '7A', 'E9', '55'],
-	['55', '1C', '1C', '55', 'E9', 'BD'],
-	['BD', '1C', '7A', '1C', '55', 'BD'],
-	['BD', '55', 'BD', '7A', '1C', '1C'],
-	['1C', '55', '55', '7A', '55', '7A']
-]
-const rewardList: RewardList = [
-	[['BD', 'E9', 'BD'], 15],
-	[['BD', '7A', 'BD'], 20],
-	[['BD', '1C', 'BD', '55'], 30]
-]
+const state = createState(exampleBoard)
 
-const startTime = performance.now()
+const divergePoint = 0
 
-const state: HackingState = {
-	matrix,
-	sequence: [],
-	taken: new Array(boardWidth * boardWidth).fill(false),
-	isHorizontal: true,
-	rcPos: 0,
-	step: []
-}
-
-const optimal = {
-	reward: 0,
-	sequence: null as Sequence,
-	step: [] as [number, number][]
-}
-
-const runner = () => {
-	if (state.sequence.length == buffer) {
-		const reward = countReward(state.sequence, rewardList)
-		if (reward > optimal.reward) {
-			optimal.reward = reward
-			optimal.sequence = [...state.sequence]
-			optimal.step = [...state.step]
-		}
+const runnerDivergePoint = divergePoint < state.board.buffer ? divergePoint : 0
+const promisedResult: Promise<FinishedMessage>[] = []
+const runner = async () => {
+	if (state.sequence.length == runnerDivergePoint) {
+		await workerManager.waitForUnemployed()
+		const promise = workerManager.run(state)
+		promisedResult.push(promise)
 		return
 	}
 
@@ -78,31 +34,46 @@ const runner = () => {
 	state.isHorizontal = !state.isHorizontal
 
 	// Iteration
-	const maxRcPos = oldIsHorizontal ? boardWidth : boardHeight
+	const maxRcPos = oldIsHorizontal ? state.board.width : state.board.height
 	for (let newRcPos = 0; newRcPos < maxRcPos; ++newRcPos) {
 		const row = oldIsHorizontal ? oldRcPos : newRcPos
 		const col = oldIsHorizontal ? newRcPos : oldRcPos
 
-		const flatten = row * boardWidth + col
+		const flatten = row * state.board.width + col
 		if (state.taken[flatten] == true) continue
 
-		const token = state.matrix[row][col]
+		const token = state.board.matrix[row][col]
 		state.rcPos = newRcPos
 		state.sequence.push(token)
-		state.step.push([row, col])
+		state.steps.push([row, col])
 		state.taken[flatten] = true
 
-		runner()
+		await runner()
 
 		state.taken[flatten] = false
 		state.sequence.pop()
-		state.step.pop()
+		state.steps.pop()
 	}
 
 	state.isHorizontal = oldIsHorizontal
 	state.rcPos = oldRcPos
 }
-runner()
-const endTime = performance.now()
 
-console.log(optimal, endTime - startTime)
+const start = performance.now()
+runner().then(() => {
+	workerManager.askToKill()
+	Promise.all(promisedResult).then((optimalStepsCandidate) => {
+		let optimalStep = optimalStepsCandidate[0]
+		let workerTime = 0
+		optimalStepsCandidate.forEach(candidate => {
+			if (candidate.reward > optimalStep.reward) {
+				optimalStep = candidate
+			}
+			workerTime += candidate.time
+		})
+		optimalStep.time = workerTime
+
+		const end = performance.now()
+		console.log(end - start, optimalStep)
+	})
+})

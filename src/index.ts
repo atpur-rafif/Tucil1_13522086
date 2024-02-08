@@ -1,1 +1,1 @@
-import "./multi/quickhacking"
+import "./quickhacking"
