@@ -96,7 +96,10 @@ export async function solve(board: HackingBoard, option?: SolveOption) {
 	let totalWorkerTime = 0
 	let optimalStep = mainOptimal
 	optimalStepsCandidate.forEach(candidate => {
-		if (candidate.reward > optimalStep.reward) {
+		if (
+			(candidate.reward > optimalStep.reward) ||
+			(candidate.reward == optimalStep.reward && candidate.steps.length < optimalStep.steps.length)
+		) {
 			optimalStep = candidate
 		}
 		totalWorkerTime += candidate.time
