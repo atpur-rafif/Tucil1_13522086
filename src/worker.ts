@@ -1,42 +1,26 @@
 import { parentPort } from "worker_threads"
-import { FinishedMessage, Sequence, RewardList } from "./types";
-
-const countReward = (sequence: Sequence, rewardList: RewardList) => {
-	let total = 0
-	for (const [targetSequence, reward] of rewardList) {
-		let matchCount = 0
-		for (const token of sequence) {
-			if (token != targetSequence[matchCount]) matchCount = 0
-			if (token == targetSequence[matchCount]) matchCount++
-			if (matchCount == targetSequence.length) {
-				total += reward
-				break
-			}
-		}
-	}
-	return total
-}
+import { FinishedMessage } from "./types";
+import { countReward } from "./reward";
 
 parentPort.addListener("message", (msg) => {
 	const state = JSON.parse(msg)
 
 	const optimal: FinishedMessage = {
 		reward: 0,
-		sequence: null as any,
-		steps: null as any,
+		sequence: [],
+		steps: [],
 		time: 0
 	}
 
 	const runner = () => {
-		if (state.sequence.length == state.board.buffer) {
-			const reward = countReward(state.sequence, state.board.rewardList)
-			if (reward > optimal.reward) {
-				optimal.reward = reward
-				optimal.sequence = [...state.sequence]
-				optimal.steps = [...state.steps]
-			}
-			return
+		const reward = countReward(state.sequence, state.board.rewardList)
+		if (reward > optimal.reward) {
+			optimal.reward = reward
+			optimal.sequence = [...state.sequence]
+			optimal.steps = [...state.steps]
 		}
+
+		if (state.sequence.length == state.board.buffer) return;
 
 		const oldIsHorizontal = state.isHorizontal
 		const oldRcPos = state.rcPos

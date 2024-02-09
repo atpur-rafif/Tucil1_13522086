@@ -1,6 +1,7 @@
 import { cpus } from "os";
 import { WorkerManager } from "./WorkerManager";
 import { FinishedMessage, HackingBoard } from "./types";
+import { countReward } from "./reward";
 
 const CPU_COUNT = cpus().length
 
@@ -29,12 +30,26 @@ export async function solve(board: HackingBoard, option?: SolveOption) {
 		...option
 	}
 
+	const mainOptimal: FinishedMessage = {
+		reward: 0,
+		sequence: [],
+		steps: [],
+		time: 0
+	}
+
 	let workerCount = 0
 	const divergePoint = option.multi ? option.divergePoint : 0
 	const workerManager = new WorkerManager(option.multi ? option.worker : 1);
 	const runnerDivergePoint = divergePoint < state.board.buffer ? divergePoint : 0
 	const promisedOptimalStepsCandidate: Promise<FinishedMessage>[] = []
 	const runner = async () => {
+		const reward = countReward(state.sequence, state.board.rewardList)
+		if (reward > mainOptimal.reward) {
+			mainOptimal.reward = reward
+			mainOptimal.sequence = [...state.sequence]
+			mainOptimal.steps = [...state.steps]
+		}
+
 		if (state.sequence.length == runnerDivergePoint) {
 			await workerManager.waitForUnemployed()
 			const promise = workerManager.run(state); workerCount++
@@ -79,7 +94,7 @@ export async function solve(board: HackingBoard, option?: SolveOption) {
 	workerManager.askToKill()
 
 	let totalWorkerTime = 0
-	let optimalStep = optimalStepsCandidate[0]
+	let optimalStep = mainOptimal
 	optimalStepsCandidate.forEach(candidate => {
 		if (candidate.reward > optimalStep.reward) {
 			optimalStep = candidate

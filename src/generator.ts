@@ -60,7 +60,7 @@ const io = async () => {
 				)
 					.fill(null)
 					.map(() => randomToken()),
-				Math.floor(Math.random() * 100)
+				Math.floor(Math.random() * 200) - 100
 			] as const
 		)
 
