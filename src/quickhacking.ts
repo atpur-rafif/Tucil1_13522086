@@ -1,6 +1,6 @@
 import { cpus } from "os";
 import { WorkerManager } from "./WorkerManager";
-import { FinishedMessage, HackingBoard, HackingState } from "./types";
+import { FinishedMessage, HackingBoard } from "./types";
 
 const CPU_COUNT = cpus().length
 
@@ -25,7 +25,7 @@ export async function solve(board: HackingBoard, option?: SolveOption) {
 	option = {
 		multi: true,
 		worker: CPU_COUNT,
-		divergePoint: Math.max(0, board.buffer - 10),
+		divergePoint: 3,
 		...option
 	}
 

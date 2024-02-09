@@ -1,6 +1,8 @@
-import { exampleBoard } from "./example"
+import { resolve } from "path"
 import { solve } from "./quickhacking"
+import { readHackingBoardFile } from "./reader"
 
-solve(exampleBoard, { multi: true }).then((res) => {
+const board = readHackingBoardFile(resolve(process.cwd(), "board.txt"))
+solve(board, { multi: true }).then((res) => {
 	console.log(res)
 })
