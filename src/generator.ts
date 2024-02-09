@@ -1,19 +1,6 @@
 import { mkdirSync, writeFileSync } from "fs"
 import { dirname } from "path"
-import { createInterface } from "readline"
-
-const readline = createInterface({
-	input: process.stdin,
-	output: process.stdout
-})
-
-const prompt = (p: string) => new Promise<string>((r) => readline.question(p, r))
-
-const promptOrDefault = async (p: string, def: string) => {
-	const inp = await prompt(p)
-	if (inp.length == 0) return def
-	return inp
-};
+import { promptOrDefault, prompt } from "./script/prompt"
 
 const io = async () => {
 	console.log("Value inside square bracket mean default, fill empty (just enter) to use that value\n")
