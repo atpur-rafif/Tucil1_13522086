@@ -27,10 +27,10 @@ const io = async () => {
 	const maxSequence = parseInt(await promptOrDefault(`Max sequence length [${def.maxSequence}]: `, def.maxSequence))
 	const randomToken = () => token[Math.floor(Math.random() * token.length)] || token[token.length - 1]
 
-	const board = new Array(width)
+	const board = new Array(height)
 		.fill(null)
 		.map(() =>
-			new Array(height)
+			new Array(width)
 				.fill(null)
 				.map(() => randomToken())
 		)
