@@ -1,5 +1,6 @@
 # Quickhacking Brute Force
 This repository created to try every single possible combination in cyberpunk [quickhacking](https://cyberpunk.fandom.com/wiki/Quickhacking) (like) scenario, or in other word using brute force to find the most optimal way to get the highest score.  
+  
 Created by: Muhammad Atpur Rafif (13522086).
 
 ## Using Script
@@ -15,4 +16,4 @@ You can use file from release, or try to compile typescript file to javascript f
 1. Move to bin directory, all script compiled there (`cd bin`)
 
 ## Multithreading
-By default, this code use all of your CPU cores. It split the work using parameter named `divergePoint`, where that point deep in recursive call, the traversal continued by nodejs worker. To cuztomize this behaviour, you can edit `index.ts`, then compile this code from source.
+By default, this code use all of your CPU cores. It split the work using parameter named `divergePoint`, where that point deep in recursive call, the traversal continued by nodejs worker. To customize this behaviour, you can edit `index.ts`, then compile this code from source.
