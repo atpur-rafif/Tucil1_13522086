@@ -9,17 +9,35 @@ const readline = createInterface({
 
 const prompt = (p: string) => new Promise<string>((r) => readline.question(p, r))
 
+const promptOrDefault = async (p: string, def: string) => {
+	const inp = await prompt(p)
+	if (inp.length == 0) return def
+	return inp
+};
+
 const io = async () => {
-	const tokenCount = parseInt(await prompt("Unique token count: "))
-	const token = (await prompt("Unique token (separated by space): "))
+	console.log("Value inside square bracket mean default, fill empty (just enter) to use that value\n")
+
+	const def = {
+		tokenCount: "5",
+		token: "BD 1C 7A 55 E9",
+		bufferSize: "7",
+		width: "6",
+		height: "6",
+		sequenceCount: "3",
+		maxSequence: "4"
+	}
+
+	const tokenCount = parseInt(await promptOrDefault(`Unique token count [${def.tokenCount}]: `, def.tokenCount))
+	const token = (await promptOrDefault(`Unique token (separated by space) [${def.token}]: `, def.token))
 		.split(" ")
 		.filter(s => s.length != 0)
 		.slice(0, tokenCount)
-	const bufferSize = parseInt(await prompt("Buffer size: "))
-	const width = parseInt(await prompt("Board width: "))
-	const height = parseInt(await prompt("Board height: "))
-	const sequenceCount = parseInt(await prompt("Sequence count: "))
-	const maxSequence = parseInt(await prompt("Max sequence length: "))
+	const bufferSize = parseInt(await promptOrDefault(`Buffer size [${def.bufferSize}]: `, def.bufferSize))
+	const width = parseInt(await promptOrDefault(`Board width [${def.width}]: `, def.width))
+	const height = parseInt(await promptOrDefault(`Board height [${def.height}]: `, def.height))
+	const sequenceCount = parseInt(await promptOrDefault(`Sequence count [${def.sequenceCount}]: `, def.sequenceCount))
+	const maxSequence = parseInt(await promptOrDefault(`Max sequence length [${def.maxSequence}]: `, def.maxSequence))
 	const randomToken = () => token[Math.floor(Math.random() * token.length)] || token[token.length - 1]
 
 	const board = new Array(width)
