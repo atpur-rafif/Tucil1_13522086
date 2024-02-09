@@ -1,7 +1,18 @@
+import { cpus } from "os";
 import { WorkerManager } from "./WorkerManager";
 import { FinishedMessage, HackingBoard, HackingState } from "./types";
 
-export async function solve(board: HackingBoard) {
+const CPU_COUNT = cpus().length
+
+type SolveOption = {
+	multi?: false,
+} | {
+	multi?: true,
+	worker?: number,
+	divergePoint?: number
+}
+
+export async function solve(board: HackingBoard, option?: SolveOption) {
 	const state = {
 		board,
 		rcPos: 0,
@@ -11,9 +22,16 @@ export async function solve(board: HackingBoard) {
 		taken: new Array(board.width * board.height),
 	}
 
+	option = {
+		multi: true,
+		worker: CPU_COUNT,
+		divergePoint: Math.max(0, board.buffer - 10),
+		...option
+	}
+
 	let workerCount = 0
-	const divergePoint = 5
-	const workerManager = new WorkerManager(12);
+	const divergePoint = option.multi ? option.divergePoint : 0
+	const workerManager = new WorkerManager(option.multi ? option.worker : 1);
 	const runnerDivergePoint = divergePoint < state.board.buffer ? divergePoint : 0
 	const promisedOptimalStepsCandidate: Promise<FinishedMessage>[] = []
 	const runner = async () => {
