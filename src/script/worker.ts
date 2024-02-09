@@ -1,6 +1,6 @@
 import { parentPort } from "worker_threads"
 import { FinishedMessage } from "./types";
-import { countReward } from "./reward";
+import { refreshOptimal } from "./reward";
 
 parentPort.addListener("message", (msg) => {
 	const state = JSON.parse(msg)
@@ -13,13 +13,7 @@ parentPort.addListener("message", (msg) => {
 	}
 
 	const runner = () => {
-		const reward = countReward(state.sequence, state.board.rewardList)
-		if (reward > optimal.reward) {
-			optimal.reward = reward
-			optimal.sequence = [...state.sequence]
-			optimal.steps = [...state.steps]
-		}
-
+		refreshOptimal(optimal, state)
 		if (state.sequence.length == state.board.buffer) return;
 
 		const oldIsHorizontal = state.isHorizontal

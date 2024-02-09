@@ -1,7 +1,7 @@
 import { cpus } from "os";
 import { WorkerManager } from "./WorkerManager";
 import { FinishedMessage, HackingBoard } from "./types";
-import { countReward } from "./reward";
+import { refreshOptimal } from "./reward";
 
 const CPU_COUNT = cpus().length
 
@@ -43,12 +43,7 @@ export async function solve(board: HackingBoard, option?: SolveOption) {
 	const runnerDivergePoint = divergePoint < state.board.buffer ? divergePoint : 0
 	const promisedOptimalStepsCandidate: Promise<FinishedMessage>[] = []
 	const runner = async () => {
-		const reward = countReward(state.sequence, state.board.rewardList)
-		if (reward > mainOptimal.reward) {
-			mainOptimal.reward = reward
-			mainOptimal.sequence = [...state.sequence]
-			mainOptimal.steps = [...state.steps]
-		}
+		refreshOptimal(mainOptimal, state)
 
 		if (state.sequence.length == runnerDivergePoint) {
 			await workerManager.waitForUnemployed()
